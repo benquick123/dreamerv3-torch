@@ -176,7 +176,8 @@ class WorldModel(nn.Module):
 
     def preprocess(self, obs):
         obs = obs.copy()
-        obs["image"] = torch.Tensor(obs["image"]) / 255.0 - 0.5
+        if "image" in obs:
+            obs["image"] = torch.Tensor(obs["image"]) / 255.0 - 0.5
         # (batch_size, batch_length) -> (batch_size, batch_length, 1)
         obs["reward"] = torch.Tensor(obs["reward"]).unsqueeze(-1)
         if "discount" in obs:

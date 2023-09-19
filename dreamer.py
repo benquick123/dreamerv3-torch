@@ -6,7 +6,7 @@ import pathlib
 import sys
 import warnings
 
-os.environ["MUJOCO_GL"] = "egl"
+# os.environ["MUJOCO_GL"] = "egl"
 
 import numpy as np
 import ruamel.yaml as yaml
@@ -106,8 +106,8 @@ class Dreamer(nn.Module):
 
     def _policy(self, obs, state, training):
         if state is None:
-            batch_size = len(obs["image"])
-            latent = self._wm.dynamics.initial(len(obs["image"]))
+            batch_size = len(obs["observation"]) if "observation" in obs else len(obs["image"])
+            latent = self._wm.dynamics.initial(batch_size)
             action = torch.zeros((batch_size, self._config.num_actions)).to(
                 self._config.device
             )
@@ -184,7 +184,17 @@ def make_dataset(episodes, config):
 
 def make_env(config, logger, mode, train_eps, eval_eps):
     suite, task = config.task.split("_", 1)
-    if suite == "dmc":
+    if suite == "lunarlander":
+        import envs.lunarlander as lunarlander
+        
+        env = lunarlander.LunarLander()
+        env = wrappers.NormalizeActions(env)
+    elif suite == "panda":
+        import envs.pandastack as pandastack
+        
+        env = pandastack.PandaStack()
+        env = wrappers.NormalizeActions(env)
+    elif suite == "dmc":
         import envs.dmc as dmc
 
         env = dmc.DeepMindControl(task, config.action_repeat, config.size)
@@ -255,7 +265,10 @@ class ProcessEpisodeWrap:
         filename = tools.save_episodes(directory, [episode])[0]
         length = len(episode["reward"]) - 1
         score = float(episode["reward"].astype(np.float64).sum())
-        video = episode["image"]
+        video = None
+        if "image" in episode:
+            video = episode["image"]
+        
         # add new episode
         cache[str(filename)] = episode
         if mode == "train":
@@ -289,7 +302,8 @@ class ProcessEpisodeWrap:
             score = sum(cls.eval_scores) / len(cls.eval_scores)
             length = sum(cls.eval_lengths) / len(cls.eval_lengths)
             episode_num = len(cls.eval_scores)
-            logger.video(f"{mode}_policy", video[None])
+            if video is not None:
+                logger.video(f"{mode}_policy", video[None])
             cls.eval_done = True
 
         print(f"{mode.title()} episode has {length} steps and return {score:.1f}.")

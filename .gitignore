@@ -1,6 +1,7 @@
 #
 *.sh
 logdir*
+results*
 vis_*
 
 # Byte-compiled / optimized / DLL files

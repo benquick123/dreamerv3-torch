@@ -5,7 +5,7 @@ defaults:
   evaldir: null
   offline_traindir: ''
   offline_evaldir: ''
-  seed: 0
+  seed: 1
   steps: 1e6
   eval_every: 1e4
   eval_episode_num: 10
@@ -128,6 +128,26 @@ dmc_proprio:
   video_pred_log: false
   encoder: {mlp_keys: '.*', cnn_keys: '$^'}
   decoder: {mlp_keys: '.*', cnn_keys: '$^'}
+
+lunarlander:
+  steps: 2.5e6
+  action_repeat: 1
+  envs: 1
+  train_ratio: 512
+  video_pred_log: false
+  encoder: {mlp_keys: '.*', cnn_keys: '$^'}
+  decoder: {mlp_keys: '.*', cnn_keys: '$^'}
+  time_limit: 500
+
+pandastack:
+  steps: 5e5
+  action_repeat: 1
+  envs: 4
+  train_ratio: 512
+  video_pred_log: false
+  encoder: {mlp_keys: '.*', cnn_keys: '$^'}
+  decoder: {mlp_keys: '.*', cnn_keys: '$^'}
+  time_limit: 100
 
 dmc_vision:
   steps: 1e6
